@@ -1,10 +1,10 @@
 // src/pages/ProductDetail.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useCart } from '../context/CartContext.jsx';
-import productsData from '../data/products.js';
 import ProductCard from '../components/ProductCard.jsx';
-import { motion } from 'framer-motion'; // Import motion
+import { motion } from 'framer-motion';
 
 // Định nghĩa variant cho FADE IN/OUT
 const pageVariants = {
@@ -45,15 +45,22 @@ export default function ProductDetail() {
   const [relatedProducts, setRelatedProducts] = useState([]);
 
   useEffect(() => {
-    const productId = parseInt(id, 10);
-    const prod = productsData.find(p => p.id === productId);
-    setProduct(prod);
+    const fetchProductAndRelated = async () => {
+      try {
+        const { data: prod } = await axios.get(`/api/products/${id}`);
+        setProduct(prod);
 
-    if (prod) {
-      const related = productsData.filter(p => p.category === prod.category && p.id !== prod.id).slice(0, 4);
-      setRelatedProducts(related);
-    }
-    
+        if (prod) {
+          const { data: allProducts } = await axios.get('/api/products');
+          const related = allProducts.filter(p => p.category === prod.category && p._id !== prod._id).slice(0, 4);
+          setRelatedProducts(related);
+        }
+      } catch (error) {
+        console.error('Error fetching product', error);
+      }
+    };
+
+    fetchProductAndRelated();
     setQuantity(1);
     setSize('M');
 
@@ -75,11 +82,21 @@ export default function ProductDetail() {
   }
 
   const handleAddToCart = () => {
-    addToCart(product.id, size, quantity);
+    if (!localStorage.getItem('userInfo')) {
+      alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+      navigate('/login');
+      return;
+    }
+    addToCart(product, size, quantity);
   };
 
   const handleBuyNow = () => {
-    addToCart(product.id, size, quantity);
+    if (!localStorage.getItem('userInfo')) {
+      alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+      navigate('/login');
+      return;
+    }
+    addToCart(product, size, quantity);
     navigate('/cart');
   };
 
@@ -95,8 +112,8 @@ export default function ProductDetail() {
       <div id="productDetailContent">
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
-            <li className="breadcrumb-item"><Link to="/">Trang chủ</Link></li>
-            <li className="breadcrumb-item"><Link to="/products">Sản phẩm</Link></li>
+            <li className="breadcrumb-item"><Link to="/" className="text-decoration-none text-reset">Trang chủ</Link></li>
+            <li className="breadcrumb-item"><Link to="/products" className="text-decoration-none text-reset">Sản phẩm</Link></li>
             <li className="breadcrumb-item active" aria-current="page">{product.name}</li>
           </ol>
         </nav>
@@ -153,7 +170,7 @@ export default function ProductDetail() {
         <h3>Sản phẩm liên quan</h3>
         <div className="row" id="relatedProducts">
           {relatedProducts.map(p => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p._id} product={p} />
           ))}
         </div>
       </div>

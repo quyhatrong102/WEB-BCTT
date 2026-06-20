@@ -1,9 +1,9 @@
 // src/pages/Home.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import ProductCard from '../components/ProductCard.jsx';
-import productsData from '../data/products.js';
-import { motion } from 'framer-motion'; // 1. Import motion
+import { motion } from 'framer-motion';
 
 // 2. Định nghĩa 1 object chứa các hiệu ứng
 const pageVariants = {
@@ -32,7 +32,15 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
 
   useEffect(() => {
-    setFeaturedProducts(productsData.slice(0, 4));
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('/api/products');
+        setFeaturedProducts(data.slice(0, 4));
+      } catch (error) {
+        console.error('Error fetching products', error);
+      }
+    };
+    fetchProducts();
   }, []);
 
   return (
@@ -65,7 +73,7 @@ export default function Home() {
           <h2 className="text-center mb-5">Sản Phẩm Nổi Bật</h2>
           <div className="row" id="featuredProducts">
             {featuredProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>

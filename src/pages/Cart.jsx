@@ -35,7 +35,7 @@ function formatPrice(price) {
 }
 
 export default function Cart() {
-  const { cart, removeFromCart, updateCartQuantity, subtotal, shipping, total } = useCart();
+  const { cart, removeFromCart, updateCartQuantity, updateCartSize, subtotal, shipping, total } = useCart();
 
   const motionProps = {
     initial: "initial",
@@ -67,7 +67,23 @@ export default function Cart() {
               <div className="cart-item" key={idx}>
                 <div className="row align-items-center">
                   <div className="col-md-2"><img src={item.image} className="img-fluid rounded" alt={item.name} /></div>
-                  <div className="col-md-4"><h6>{item.name}</h6><small className="text-muted">Kích thước: {item.size}</small></div>
+                  <div className="col-md-4">
+                    <h6>{item.name}</h6>
+                    <div className="d-flex align-items-center mt-2">
+                      <small className="text-muted me-2">Kích thước:</small>
+                      <select 
+                        value={item.size} 
+                        onChange={(e) => updateCartSize(idx, e.target.value)} 
+                        className="form-select form-select-sm" 
+                        style={{width: '70px'}}
+                      >
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                      </select>
+                    </div>
+                  </div>
                   <div className="col-md-2">
                     <div className="input-group quantity-input">
                       <button className="btn btn-outline-secondary btn-sm" onClick={() => updateCartQuantity(idx, -1)}>-</button>

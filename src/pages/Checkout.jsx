@@ -1,7 +1,9 @@
 // src/pages/Checkout.jsx
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useCart } from '../context/CartContext.jsx';
+import { AuthContext } from '../context/AuthContext.jsx';
 import { motion } from 'framer-motion'; // Import motion
 
 // Định nghĩa variant cho FADE IN/OUT
@@ -34,9 +36,23 @@ function formatPrice(price) {
 
 export default function Checkout() {
   const { cart, subtotal, shipping, total, clearCart } = useCart();
+  const { userInfo } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleSubmitOrder = (event) => {
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [country, setCountry] = useState('');
+  const [phone, setPhone] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigate('/login');
+    }
+  }, [userInfo, navigate]);
+
+  const handleSubmitOrder = async (event) => {
     event.preventDefault(); 
     
     const form = document.getElementById('checkoutForm');
@@ -50,10 +66,43 @@ export default function Checkout() {
       return;
     }
 
-    alert('Đặt hàng thành công! Cảm ơn bạn đã mua hàng.');
-    
-    clearCart(); 
-    navigate('/');
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+
+      const orderItems = cart.map(item => ({
+        name: item.name,
+        qty: item.quantity,
+        size: item.size || 'M',
+        image: item.image,
+        price: item.price,
+        product: item.id,
+      }));
+
+      await axios.post(
+        '/api/orders',
+        {
+          orderItems,
+          shippingAddress: { address, city, postalCode, country, phone },
+          paymentMethod,
+          itemsPrice: subtotal,
+          shippingPrice: shipping,
+          taxPrice: 0,
+          totalPrice: total,
+        },
+        config
+      );
+
+      alert('Đặt hàng thành công! Cảm ơn bạn đã mua hàng.');
+      clearCart(); 
+      navigate('/order-success');
+    } catch (error) {
+      alert(error.response && error.response.data.message ? error.response.data.message : error.message);
+    }
   };
 
   return (
@@ -76,25 +125,25 @@ export default function Checkout() {
               <div className="card-body">
                 <div className="row">
                   <div className="col-md-6 mb-3">
-                    <label htmlFor="firstName" className="form-label">Họ</label>
-                    <input type="text" className="form-control" id="firstName" required />
+                    <label htmlFor="city" className="form-label">Thành phố</label>
+                    <input type="text" className="form-control" id="city" value={city} onChange={(e) => setCity(e.target.value)} required />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <label htmlFor="lastName" className="form-label">Tên</label>
-                    <input type="text" className="form-control" id="lastName" required />
+                    <label htmlFor="postalCode" className="form-label">Mã bưu điện</label>
+                    <input type="text" className="form-control" id="postalCode" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} required />
                   </div>
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email</label>
-                  <input type="email" className="form-control" id="email" required />
+                  <label htmlFor="country" className="form-label">Quốc gia</label>
+                  <input type="text" className="form-control" id="country" value={country} onChange={(e) => setCountry(e.target.value)} required />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="phone" className="form-label">Số điện thoại</label>
-                  <input type="tel" className="form-control" id="phone" required />
+                  <input type="tel" className="form-control" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} required />
                 </div>
                 <div className="mb-3">
                   <label htmlFor="address" className="form-label">Địa chỉ</label>
-                  <textarea className="form-control" id="address" rows="3" required></textarea>
+                  <textarea className="form-control" id="address" rows="3" value={address} onChange={(e) => setAddress(e.target.value)} required></textarea>
                 </div>
               </div>
             </div>
@@ -105,15 +154,15 @@ export default function Checkout() {
               </div>
               <div className="card-body">
                 <div className="form-check mb-3">
-                  <input className="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" defaultChecked />
+                  <input className="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" checked={paymentMethod === 'cod'} onChange={(e) => setPaymentMethod(e.target.value)} />
                   <label className="form-check-label" htmlFor="cod">Thanh toán khi nhận hàng (COD)</label>
                 </div>
                 <div className="form-check mb-3">
-                  <input className="form-check-input" type="radio" name="paymentMethod" id="transfer" value="transfer" />
+                  <input className="form-check-input" type="radio" name="paymentMethod" id="transfer" value="transfer" checked={paymentMethod === 'transfer'} onChange={(e) => setPaymentMethod(e.target.value)} />
                   <label className="form-check-label" htmlFor="transfer">Chuyển khoản ngân hàng</label>
                 </div>
                 <div className="form-check">
-                  <input className="form-check-input" type="radio" name="paymentMethod" id="card" value="card" />
+                  <input className="form-check-input" type="radio" name="paymentMethod" id="card" value="card" checked={paymentMethod === 'card'} onChange={(e) => setPaymentMethod(e.target.value)} />
                   <label className="form-check-label" htmlFor="card">Thẻ tín dụng/ghi nợ</label>
                 </div>
               </div>

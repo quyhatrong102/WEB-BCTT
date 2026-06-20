@@ -7,6 +7,7 @@ import {
 
 // Import Provider mà chúng ta vừa tạo
 import { CartProvider } from './context/CartContext.jsx'; // Thêm .jsx
+import { AuthProvider } from './context/AuthContext.jsx';
 
 // Import Layout và tất cả các trang (THÊM .jsx cho TẤT CẢ)
 import Layout from './components/Layout.jsx';
@@ -19,8 +20,16 @@ import Contact from './pages/Contact.jsx';
 import About from './pages/About.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import AdminProducts from './pages/admin/AdminProducts.jsx';
+import AdminProductEdit from './pages/admin/AdminProductEdit.jsx';
+import AdminOrders from './pages/admin/AdminOrders.jsx';
+import AdminUsers from './pages/admin/AdminUsers.jsx';
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import Profile from './pages/Profile.jsx';
+import MyOrders from './pages/MyOrders.jsx';
+import OrderSuccess from './pages/OrderSuccess.jsx';
 
-// Định nghĩa routes (giữ nguyên)
 const router = createBrowserRouter([
   {
     path: '/',
@@ -31,20 +40,30 @@ const router = createBrowserRouter([
       { path: 'product/:id', element: <ProductDetail /> },
       { path: 'cart', element: <Cart /> },
       { path: 'checkout', element: <Checkout /> },
+      { path: 'order-success', element: <OrderSuccess /> },
       { path: 'contact', element: <Contact /> },
       { path: 'about', element: <About /> },
       { path: 'login', element: <Login /> },
       { path: 'register', element: <Register /> },
+      { path: 'forgot-password', element: <ForgotPassword /> },
+      { path: 'profile', element: <Profile /> },
+      { path: 'myorders', element: <MyOrders /> },
+      { path: 'admin', element: <AdminDashboard /> },
+      { path: 'admin/products', element: <AdminProducts /> },
+      { path: 'admin/product/:id/edit', element: <AdminProductEdit /> },
+      { path: 'admin/orders', element: <AdminOrders /> },
+      { path: 'admin/users', element: <AdminUsers /> },
     ],
   },
 ]);
 
 function App() {
   return (
-    // Bọc CartProvider ở ngoài cùng
-    <CartProvider>
-      <RouterProvider router={router} />
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <RouterProvider router={router} />
+      </CartProvider>
+    </AuthProvider>
   );
 }
 

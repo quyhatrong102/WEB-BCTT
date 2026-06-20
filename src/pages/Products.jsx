@@ -1,6 +1,6 @@
 // src/pages/Products.jsx
-import React, { useState, useMemo } from 'react';
-import productsData from '../data/products.js';
+import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import ProductCard from '../components/ProductCard.jsx';
 import { motion } from 'framer-motion'; // Import motion
 
@@ -28,8 +28,21 @@ const pageTransition = {
 };
 
 export default function Products() {
+  const [productsData, setProductsData] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priceFilter, setPriceFilter] = useState('all');
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data } = await axios.get('/api/products');
+        setProductsData(data);
+      } catch (error) {
+        console.error('Error fetching products', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     let filtered = productsData;
@@ -54,7 +67,7 @@ export default function Products() {
       }
     }
     return filtered;
-  }, [categoryFilter, priceFilter]); 
+  }, [categoryFilter, priceFilter, productsData]); 
 
   return (
     <motion.div
@@ -104,7 +117,7 @@ export default function Products() {
       <div className="row" id="allProducts">
         {filteredProducts.length > 0 ? (
           filteredProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product._id} product={product} />
           ))
         ) : (
           <div className="col-12 text-center"><p className="text-muted">Không tìm thấy sản phẩm nào.</p></div>
