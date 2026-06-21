@@ -34,8 +34,8 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get('/api/products');
-        setFeaturedProducts(data.slice(0, 4));
+        const { data } = await axios.get('/api/products/top');
+        setFeaturedProducts(data);
       } catch (error) {
         console.error('Error fetching products', error);
       }

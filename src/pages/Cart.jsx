@@ -86,10 +86,15 @@ export default function Cart() {
                   </div>
                   <div className="col-md-2">
                     <div className="input-group quantity-input">
-                      <button className="btn btn-outline-secondary btn-sm" onClick={() => updateCartQuantity(idx, -1)}>-</button>
-                      <input type="number" className="form-control form-control-sm text-center" value={item.quantity} min="1" readOnly />
-                      <button className="btn btn-outline-secondary btn-sm" onClick={() => updateCartQuantity(idx, 1)}>+</button>
+                      <button className="btn btn-outline-secondary btn-sm" onClick={() => updateCartQuantity(idx, -1)} disabled={item.quantity <= 1}>-</button>
+                      <input type="number" className="form-control form-control-sm text-center" value={item.quantity} min="1" max={item.countInStock || 999} readOnly />
+                      <button className="btn btn-outline-secondary btn-sm" onClick={() => updateCartQuantity(idx, 1)} disabled={item.countInStock !== undefined && item.quantity >= item.countInStock}>+</button>
                     </div>
+                    {item.countInStock !== undefined && (
+                      <div className="text-center mt-1">
+                        <small className="text-success">Còn lại: {item.countInStock}</small>
+                      </div>
+                    )}
                   </div>
                   <div className="col-md-2 text-center"><strong>{formatPrice(item.price * item.quantity)}</strong></div>
                   <div className="col-md-2 text-center">

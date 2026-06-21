@@ -7,21 +7,25 @@ import sendEmail from '../utils/sendEmail.js';
 // @route   POST /api/users/login
 // @access  Public
 const authUser = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      isStaff: user.isStaff,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác' });
+    if (user && (await user.matchPassword(password))) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isStaff: user.isStaff,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
   }
 };
 
@@ -63,43 +67,47 @@ const sendOTP = async (req, res) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = async (req, res) => {
-  const { name, email, password, otp } = req.body;
+  try {
+    const { name, email, password, otp } = req.body;
 
-  const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email });
 
-  if (userExists) {
-    res.status(400).json({ message: 'Email này đã được sử dụng' });
-    return;
-  }
+    if (userExists) {
+      res.status(400).json({ message: 'Email này đã được sử dụng' });
+      return;
+    }
 
-  // Xác thực OTP
-  if (!otp) {
-    res.status(400).json({ message: 'Vui lòng cung cấp mã OTP' });
-    return;
-  }
-  const otpRecord = await OTP.findOne({ email, otp });
-  if (!otpRecord) {
-    res.status(400).json({ message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
-    return;
-  }
+    // Xác thực OTP
+    if (!otp) {
+      res.status(400).json({ message: 'Vui lòng cung cấp mã OTP' });
+      return;
+    }
+    const otpRecord = await OTP.findOne({ email, otp });
+    if (!otpRecord) {
+      res.status(400).json({ message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
+      return;
+    }
 
-  const user = await User.create({
-    name,
-    email,
-    password,
-  });
-
-  if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      isStaff: user.isStaff,
-      token: generateToken(user._id),
+    const user = await User.create({
+      name,
+      email,
+      password,
     });
-  } else {
-    res.status(400).json({ message: 'Dữ liệu người dùng không hợp lệ' });
+
+    if (user) {
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isStaff: user.isStaff,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(400).json({ message: 'Dữ liệu người dùng không hợp lệ' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
   }
 };
 
@@ -107,18 +115,22 @@ const registerUser = async (req, res) => {
 // @route   GET /api/users/profile
 // @access  Private
 const getUserProfile = async (req, res) => {
-  const user = await User.findById(req.user._id);
+  try {
+    const user = await User.findById(req.user._id);
 
-  if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-      isStaff: user.isStaff,
-    });
-  } else {
-    res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    if (user) {
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isStaff: user.isStaff,
+      });
+    } else {
+      res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
   }
 };
 
@@ -126,27 +138,35 @@ const getUserProfile = async (req, res) => {
 // @route   PUT /api/users/profile
 // @access  Private
 const updateUserProfile = async (req, res) => {
-  const user = await User.findById(req.user._id);
+  try {
+    const user = await User.findById(req.user._id);
 
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    if (req.body.password) {
-      user.password = req.body.password;
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+
+      const updatedUser = await user.save();
+
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin,
+        isStaff: updatedUser.isStaff,
+        token: generateToken(updatedUser._id),
+      });
+    } else {
+      res.status(404).json({ message: 'Không tìm thấy người dùng' });
     }
-
-    const updatedUser = await user.save();
-
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
-      isStaff: updatedUser.isStaff,
-      token: generateToken(updatedUser._id),
-    });
-  } else {
-    res.status(404).json({ message: 'Không tìm thấy người dùng' });
+  } catch (error) {
+    // Xử lý lỗi trùng email
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Email này đã tồn tại' });
+    }
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
   }
 };
 
@@ -154,21 +174,33 @@ const updateUserProfile = async (req, res) => {
 // @route   GET /api/users
 // @access  Private/Admin
 const getUsers = async (req, res) => {
-  const users = await User.find({});
-  res.json(users);
+  try {
+    const users = await User.find({}).select('-password');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
+  }
 };
 
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 // @access  Private/Admin
 const deleteUser = async (req, res) => {
-  const user = await User.findById(req.params.id);
+  try {
+    if (req.params.id === req.user._id.toString()) {
+      return res.status(400).json({ message: 'Không thể xóa chính mình' });
+    }
 
-  if (user) {
-    await User.deleteOne({ _id: user._id });
-    res.json({ message: 'Đã xóa người dùng' });
-  } else {
-    res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+      await User.deleteOne({ _id: user._id });
+      res.json({ message: 'Đã xóa người dùng' });
+    } else {
+      res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
   }
 };
 
@@ -176,60 +208,72 @@ const deleteUser = async (req, res) => {
 // @route   POST /api/users/reset-password
 // @access  Public
 const resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  try {
+    const { email, otp, newPassword } = req.body;
 
-  if (!email || !otp || !newPassword) {
-    return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin' });
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản với email này' });
+    }
+
+    const otpRecord = await OTP.findOne({ email, otp });
+    if (!otpRecord) {
+      return res.status(400).json({ message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    // Xóa OTP sau khi đổi pass thành công
+    await OTP.deleteMany({ email });
+
+    res.json({ message: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
   }
-
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(404).json({ message: 'Không tìm thấy tài khoản với email này' });
-  }
-
-  const otpRecord = await OTP.findOne({ email, otp });
-  if (!otpRecord) {
-    return res.status(400).json({ message: 'Mã OTP không hợp lệ hoặc đã hết hạn' });
-  }
-
-  user.password = newPassword;
-  await user.save();
-
-  // Xóa OTP sau khi đổi pass thành công
-  await OTP.deleteMany({ email });
-
-  res.json({ message: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.' });
 };
 
 // @desc    Update user role
 // @route   PUT /api/users/:id/role
 // @access  Private/Admin
 const updateUserRole = async (req, res) => {
-  const user = await User.findById(req.params.id);
-  const { role } = req.body;
-
-  if (user) {
-    if (role === 'admin') {
-      user.isAdmin = true;
-      user.isStaff = false;
-    } else if (role === 'staff') {
-      user.isAdmin = false;
-      user.isStaff = true;
-    } else if (role === 'user') {
-      user.isAdmin = false;
-      user.isStaff = false;
+  try {
+    if (req.params.id === req.user._id.toString()) {
+      return res.status(400).json({ message: 'Không thể tự đổi quyền chính mình' });
     }
 
-    const updatedUser = await user.save();
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
-      isStaff: updatedUser.isStaff,
-    });
-  } else {
-    res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    const user = await User.findById(req.params.id);
+    const { role } = req.body;
+
+    if (user) {
+      if (role === 'admin') {
+        user.isAdmin = true;
+        user.isStaff = false;
+      } else if (role === 'staff') {
+        user.isAdmin = false;
+        user.isStaff = true;
+      } else if (role === 'user') {
+        user.isAdmin = false;
+        user.isStaff = false;
+      }
+
+      const updatedUser = await user.save();
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin,
+        isStaff: updatedUser.isStaff,
+      });
+    } else {
+      res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Lỗi hệ thống' });
   }
 };
 

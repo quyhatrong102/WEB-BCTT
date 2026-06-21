@@ -64,6 +64,23 @@ export default function AdminOrders() {
     }
   };
 
+  const payHandler = async (id) => {
+    if (window.confirm('Xác nhận đơn hàng này đã được thanh toán?')) {
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        };
+        await axios.put(`/api/orders/${id}/pay`, {}, config);
+        fetchOrders();
+        alert('Đã cập nhật trạng thái thanh toán');
+      } catch (error) {
+        alert(error.response?.data?.message || 'Lỗi khi cập nhật thanh toán');
+      }
+    }
+  };
+
   return (
     <div className="container py-5">
       <div className="mb-4">
@@ -115,7 +132,14 @@ export default function AdminOrders() {
                   {order.shippingAddress?.address}, {order.shippingAddress?.city}<br/>
                   SĐT: <strong>{order.shippingAddress?.phone || 'N/A'}</strong>
                 </td>
-                <td>{order.paymentMethod?.toUpperCase() || 'N/A'}</td>
+                <td>
+                  {order.paymentMethod?.toUpperCase() || 'N/A'}<br/>
+                  {order.isPaid ? (
+                    <span className="badge bg-success mt-1">Đã thanh toán</span>
+                  ) : (
+                    <span className="badge bg-warning text-dark mt-1">Chưa thanh toán</span>
+                  )}
+                </td>
                 <td>{order.createdAt.substring(0, 10)}</td>
                 <td>{order.totalPrice} đ</td>
                 <td>
@@ -126,18 +150,26 @@ export default function AdminOrders() {
                   )}
                 </td>
                 <td>
-                  {!order.isDelivered ? (
-                    <div className="d-flex gap-2">
-                      <button className="btn btn-sm btn-success" onClick={() => deliverHandler(order._id)}>
+                  <div className="d-flex flex-column gap-2">
+                    {!order.isPaid && (
+                      <button className="btn btn-sm btn-outline-success" onClick={() => payHandler(order._id)}>
+                        Xác nhận TT
+                      </button>
+                    )}
+                    {!order.isDelivered && (
+                      <button className="btn btn-sm btn-primary" onClick={() => deliverHandler(order._id)}>
                         Giao hàng
                       </button>
+                    )}
+                    {(!order.isDelivered || !order.isPaid) && (
                       <button className="btn btn-sm btn-danger" onClick={() => deleteHandler(order._id)}>
                         Hủy đơn
                       </button>
-                    </div>
-                  ) : (
-                    <span className="text-muted fst-italic">Hoàn tất</span>
-                  )}
+                    )}
+                    {(order.isDelivered && order.isPaid) && (
+                      <span className="text-muted fst-italic">Hoàn tất</span>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

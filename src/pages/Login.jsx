@@ -73,10 +73,6 @@ export default function Login() {
                   <label htmlFor="loginPassword" className="form-label">Mật khẩu</label>
                   <input type="password" className="form-control" id="loginPassword" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
-                <div className="mb-3 form-check">
-                  <input type="checkbox" className="form-check-input" id="rememberMe" />
-                  <label className="form-check-label" htmlFor="rememberMe">Ghi nhớ đăng nhập</label>
-                </div>
                 <button type="submit" className="btn btn-primary w-100 mt-2">Đăng Nhập</button>
               </form>
               <div className="text-center mt-3">

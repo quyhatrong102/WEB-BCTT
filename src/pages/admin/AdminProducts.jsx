@@ -93,6 +93,7 @@ export default function AdminProducts() {
               <th>ID</th>
               <th>TÊN</th>
               <th>GIÁ</th>
+              <th>TỒN KHO</th>
               <th>DANH MỤC</th>
               <th>HÀNH ĐỘNG</th>
             </tr>
@@ -103,6 +104,7 @@ export default function AdminProducts() {
                 <td>{product._id.substring(product._id.length - 6)}</td>
                 <td>{product.name}</td>
                 <td>{product.price} đ</td>
+                <td>{product.countInStock}</td>
                 <td>{formatCategory(product.category)}</td>
                 <td>
                   <Link to={`/admin/product/${product._id}/edit`} className="btn btn-sm btn-warning me-2">

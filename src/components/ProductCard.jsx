@@ -36,9 +36,12 @@ export default function ProductCard({ product }) {
       whileHover={{ scale: 1.03, y: -5 }} // Phóng to nhẹ và nhích lên trên khi hover
       transition={{ type: "spring", stiffness: 300 }} // Hiệu ứng mượt hơn
     >
-      <div className="card h-100 product-card shadow-sm border-0">
+      <div className="card h-100 product-card shadow-sm border-0 position-relative">
         <Link to={`/product/${product._id}`}>
           <img src={product.image} className="card-img-top product-img" alt={product.name} />
+          {product.countInStock === 0 && (
+             <span className="badge bg-danger position-absolute top-0 start-0 m-2" style={{ zIndex: 1 }}>Hết hàng</span>
+          )}
         </Link>
         <div className="card-body d-flex flex-column text-center">
           <Link to={`/product/${product._id}`} className="text-decoration-none text-dark">
@@ -52,9 +55,9 @@ export default function ProductCard({ product }) {
               </Link>
             </div>
           </div>
-          <button className="btn btn-primary mt-auto" onClick={handleAddToCart}>
+          <button className={`btn ${product.countInStock === 0 ? 'btn-secondary' : 'btn-primary'} mt-auto`} onClick={handleAddToCart} disabled={product.countInStock === 0}>
             <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
-            Thêm vào giỏ
+            {product.countInStock === 0 ? 'Hết hàng' : 'Thêm vào giỏ'}
           </button>
         </div>
       </div>

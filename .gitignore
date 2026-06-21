@@ -19,6 +19,15 @@ dist-ssr
 .DS_Store
 *.suo
 *.ntvs*
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+backend/.env
+
+# next.js*
 *.njsproj
 *.sln
 *.sw?

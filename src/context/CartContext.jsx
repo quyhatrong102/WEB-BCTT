@@ -63,7 +63,8 @@ export function CartProvider({ children }) {
           price: product.price, 
           image: product.image, 
           size, 
-          quantity 
+          quantity,
+          countInStock: product.countInStock 
         }];
       }
     });

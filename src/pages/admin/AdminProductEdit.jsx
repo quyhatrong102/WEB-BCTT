@@ -13,6 +13,7 @@ export default function AdminProductEdit() {
   const [image, setImage] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [countInStock, setCountInStock] = useState(0);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function AdminProductEdit() {
         setImage(data.image);
         setCategory(data.category);
         setDescription(data.description);
+        setCountInStock(data.countInStock);
       } catch (error) {
         alert('Lỗi tải sản phẩm');
       }
@@ -54,6 +56,7 @@ export default function AdminProductEdit() {
           image,
           category,
           description,
+          countInStock,
         },
         config
       );
@@ -76,6 +79,7 @@ export default function AdminProductEdit() {
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${userInfo.token}`,
         },
       };
 
@@ -161,6 +165,18 @@ export default function AdminProductEdit() {
                 <option value="ao-hoodie">Áo Hoodie</option>
                 <option value="ao-khoac">Áo Khoác</option>
               </select>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Số lượng tồn kho</label>
+              <input
+                type="number"
+                className="form-control"
+                value={countInStock}
+                onChange={(e) => setCountInStock(e.target.value)}
+                required
+                min="0"
+              />
             </div>
 
             <div className="mb-3">

@@ -59,7 +59,7 @@ export default function Contact() {
           <div className="card mt-5">
             <div className="card-header"><h5>Gửi Tin Nhắn</h5></div>
             <div className="card-body">
-              <form>
+              <form onSubmit={(e) => { e.preventDefault(); alert('Tin nhắn đã được gửi thành công!'); }}>
                 <div className="row">
                   <div className="col-md-6 mb-3"><input type="text" className="form-control" placeholder="Họ tên" /></div>
                   <div className="col-md-6 mb-3"><input type="email" className="form-control" placeholder="Email" /></div>

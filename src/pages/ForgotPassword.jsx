@@ -29,7 +29,7 @@ export default function ForgotPassword() {
     const result = await sendOTP(email);
     setLoading(false);
     if (result.success) {
-      setSuccessMsg(result.message);
+      alert('Mã OTP đã được gửi đến email của bạn');
       setStep(2);
     } else {
       setErrorMsg(result.message);

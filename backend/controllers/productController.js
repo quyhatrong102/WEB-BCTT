@@ -12,6 +12,42 @@ const getProducts = async (req, res) => {
   }
 };
 
+// @desc    Get top rated products
+// @route   GET /api/products/top
+// @access  Public
+const getTopProducts = async (req, res) => {
+  try {
+    const Order = (await import('../models/orderModel.js')).default;
+    const topProductsIds = await Order.aggregate([
+      { $unwind: '$orderItems' },
+      { 
+        $group: { 
+          _id: '$orderItems.product', 
+          qty: { $sum: '$orderItems.qty' } 
+        } 
+      },
+      { $sort: { qty: -1 } },
+      { $limit: 4 }
+    ]);
+    
+    const productIds = topProductsIds.map(p => p._id);
+    const products = await Product.find({ _id: { $in: productIds } });
+    
+    const sortedProducts = topProductsIds.map(top => 
+      products.find(p => p._id.toString() === top._id.toString())
+    ).filter(p => p !== undefined);
+
+    if (sortedProducts.length < 4) {
+      const moreProducts = await Product.find({ _id: { $nin: productIds } }).limit(4 - sortedProducts.length);
+      sortedProducts.push(...moreProducts);
+    }
+    
+    res.json(sortedProducts);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching top products' });
+  }
+};
+
 // @desc    Fetch single product
 // @route   GET /api/products/:id
 // @access  Public
@@ -109,4 +145,5 @@ export {
   deleteProduct,
   createProduct,
   updateProduct,
+  getTopProducts,
 };

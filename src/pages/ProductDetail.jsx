@@ -126,8 +126,14 @@ export default function ProductDetail() {
             <div className="price mb-4">{formatPrice(product.price)}</div>
             <div className="mb-4"><h5>Mô tả sản phẩm:</h5><p>{product.description}</p></div>
             
-            <div className="mb-4"><h5>Kích thước:</h5>
-              <div className="btn-group" role="group">
+            <div className="mb-4">
+              <h5>Kích thước:</h5>
+              {product.countInStock === 0 ? (
+                <span className="badge bg-danger fs-6">Hết hàng</span>
+              ) : (
+                <span className="badge bg-success fs-6">Còn lại: {product.countInStock} sản phẩm</span>
+              )}
+              <div className="btn-group mt-3 d-block" role="group">
                 {['S', 'M', 'L', 'XL'].map(s => (
                   <React.Fragment key={s}>
                     <input
@@ -148,17 +154,17 @@ export default function ProductDetail() {
             <div className="mb-4">
               <h5>Số lượng:</h5>
               <div className="input-group quantity-input">
-                <button className="btn btn-outline-secondary" type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
-                <input type="number" className="form-control text-center" value={quantity} min="1" onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))} />
-                <button className="btn btn-outline-secondary" type="button" onClick={() => setQuantity(quantity + 1)}>+</button>
+                <button className="btn btn-outline-secondary" type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={product.countInStock === 0}>-</button>
+                <input type="number" className="form-control text-center" value={quantity} min="1" max={product.countInStock} onChange={(e) => setQuantity(Math.min(product.countInStock, Math.max(1, parseInt(e.target.value, 10) || 1)))} disabled={product.countInStock === 0} />
+                <button className="btn btn-outline-secondary" type="button" onClick={() => setQuantity(Math.min(product.countInStock, quantity + 1))} disabled={product.countInStock === 0}>+</button>
               </div>
             </div>
             
             <div className="d-flex gap-3">
-              <button className="btn btn-primary btn-lg" onClick={handleAddToCart}>
+              <button className="btn btn-primary btn-lg" onClick={handleAddToCart} disabled={product.countInStock === 0}>
                 <i className="fas fa-cart-plus"></i> Thêm vào giỏ hàng
               </button>
-              <button className="btn btn-success btn-lg" onClick={handleBuyNow}>
+              <button className="btn btn-success btn-lg" onClick={handleBuyNow} disabled={product.countInStock === 0}>
                 <i className="fas fa-shopping-bag"></i> Mua ngay
               </button>
             </div>

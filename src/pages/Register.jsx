@@ -64,7 +64,7 @@ export default function Register() {
     const result = await sendOTP(email);
     setLoading(false);
     if (result.success) {
-      setSuccessMsg(result.message);
+      setSuccessMsg('Mã OTP đã được gửi đến email của bạn');
       setStep(2); // Chuyển sang bước nhập OTP
     } else {
       setErrorMsg(result.message);
