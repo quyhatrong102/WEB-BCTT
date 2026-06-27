@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 
-// Import Provider mà chúng ta vừa tạo
+// Import Provider vừa tạo
 import { CartProvider } from './context/CartContext.jsx'; // Thêm .jsx
 import { AuthProvider } from './context/AuthContext.jsx';
 
@@ -33,11 +33,11 @@ import OrderSuccess from './pages/OrderSuccess.jsx';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />, 
+    element: <Layout />, // Layout là "khung sườn" chung (có Header + Footer)
     children: [
-      { index: true, element: <Home /> },
-      { path: 'products', element: <Products /> },
-      { path: 'product/:id', element: <ProductDetail /> },
+      { index: true, element: <Home /> }, // "/"
+      { path: 'products', element: <Products /> }, // "/products"
+      { path: 'product/:id', element: <ProductDetail /> }, // "/product/123"
       { path: 'cart', element: <Cart /> },
       { path: 'checkout', element: <Checkout /> },
       { path: 'order-success', element: <OrderSuccess /> },
@@ -59,8 +59,8 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
+    <AuthProvider> {/* Bọc ngoài cùng -> mọi trang đều biết ai đang đăng nhập */}
+      <CartProvider> {/* Bọc trong -> mọi trang đều truy cập được giỏ hàng */}
         <RouterProvider router={router} />
       </CartProvider>
     </AuthProvider>

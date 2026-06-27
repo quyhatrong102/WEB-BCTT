@@ -22,13 +22,13 @@ export function CartProvider({ children }) {
       console.error("Lỗi khi load giỏ hàng từ localStorage", e);
       setCart([]);
     }
-  }, []); // [] nghĩa là chỉ chạy 1 lần
+  }, []); // [] rỗng -> chỉ chạy 1 LẦN lúc App khởi động (load lại giỏ hàng cũ)
 
   // 4. Lưu giỏ hàng vào localStorage mỗi khi state 'cart' thay đổi
   // (Tương tự hàm saveCartToStorage)
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  }, [cart]); // [cart] nghĩa là chạy lại mỗi khi 'cart' thay đổi
+  }, [cart]); // Chạy lại MỖI KHI biến `cart` đổi -> tự lưu lại
 
   // 5. Các hàm xử lý giỏ hàng (Chuyển từ app.js sang)
   
@@ -49,14 +49,14 @@ export function CartProvider({ children }) {
       const existing = prevCart.find(c => c.id === productId && c.size === size);
       
       if (existing) {
-        // Nếu đã tồn tại -> cập nhật số lượng
+        // Cùng sản phẩm + cùng size -> chỉ tăng số lượng, không tạo dòng mới
         return prevCart.map(item =>
           item.id === productId && item.size === size
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
-        // Nếu chưa tồn tại -> thêm mới vào mảng
+        // Khác size hoặc sản phẩm mới -> thêm dòng mới
         return [...prevCart, { 
           id: product._id, 
           name: product.name, 

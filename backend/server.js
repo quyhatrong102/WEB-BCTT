@@ -16,8 +16,8 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(cors());                 // Cho phép Frontend (port khác) gọi vào
+app.use(express.json());         // Cho phép đọc JSON từ request body
 
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
@@ -25,10 +25,10 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
 
 const __dirname = path.resolve();
-app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '/uploads'))); // Cho phép truy cập ảnh đã upload qua URL
 
-app.use(notFound);
-app.use(errorHandler);
+app.use(notFound);      // Nếu route không khớp cái nào ở trên -> báo lỗi 404
+app.use(errorHandler);  // Nếu có lỗi (next(error)) -> xử lý tập trung ở đây
 
 const PORT = process.env.PORT || 5000;
 

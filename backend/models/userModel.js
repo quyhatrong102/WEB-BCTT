@@ -38,7 +38,7 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) {
-    return;
+    return;   // Nếu không đổi password thì khỏi hash lại
   }
 
   const salt = await bcrypt.genSalt(10);

@@ -52,8 +52,8 @@ export const AuthProvider = ({ children }) => {
         config
       );
 
-      setUserInfo(data);
-      localStorage.setItem('userInfo', JSON.stringify(data));
+      setUserInfo(data); // Lưu vào state (React re-render)
+      localStorage.setItem('userInfo', JSON.stringify(data)); // Lưu vào localStorage (sống sót qua F5)
       return { success: true };
     } catch (error) {
       return {

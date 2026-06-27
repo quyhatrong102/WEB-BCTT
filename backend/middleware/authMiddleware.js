@@ -9,13 +9,13 @@ const protect = async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer')
   ) {
     try {
-      token = req.headers.authorization.split(' ')[1];
+      token = req.headers.authorization.split(' ')[1]; // Bỏ chữ "Bearer ", lấy phần token thật
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Giải mã + xác minh chữ ký
 
-      req.user = await User.findById(decoded.id).select('-password');
+      req.user = await User.findById(decoded.id).select('-password'); // Gắn user vào req để Controller dùng
 
-      next();
+      next(); // Token hợp lệ -> cho đi tiếp
     } catch (error) {
       res.status(401).json({ message: 'Phiên đăng nhập hết hạn hoặc không hợp lệ' });
     }

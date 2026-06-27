@@ -13,7 +13,7 @@ const otpSchema = mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      index: { expires: 300 }, // Expire after 5 minutes (300 seconds)
+      index: { expires: 300 }, // TTL Index — MongoDB tự xoá document này sau 300 giây (5 phút)
     },
   }
 );
